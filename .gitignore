@@ -1,0 +1,8 @@
+__pycache__
+.buildozer
+bin
+new.py
+camera_ex.py
+brudnopis.py
+*.mp4
+*.pdf
