@@ -1,13 +1,20 @@
-
 from kivy.app import App
 from kivy.uix.image import Image
+from kivy.uix.button import Button
 from kivy.clock import Clock
 from kivy.graphics.texture import Texture
 import cv2
+import numpy as np
 import configparser
 from detector import Detector
+from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.floatlayout import FloatLayout
+from kivy.uix.camera import Camera
+from kivy.lang import Builder
 
-
+# from android.permissions import request_permissions, Permission
+ 
+ 
 class KivyCV(Image):
     """
     A class that update view for user.
@@ -38,7 +45,7 @@ class KivyCV(Image):
         ret, frame = self.capture.read()
         if ret:
             # use Detector class to detect object on frame
-            frame = Detector.detect_crosswalk(frame)
+            frame = Detector.detect_crosswalk_only_center(frame)
             if frame is not None:
                 # create texture from np.array
                 buf = cv2.flip(frame, 0).tostring()
@@ -47,7 +54,6 @@ class KivyCV(Image):
                 image_texture.blit_buffer(buf, colorfmt='bgr', bufferfmt='ubyte')
                 # display image from the texture
                 self.texture = image_texture
-
 
 class CrosswalkDetectionApp(App):
     """
@@ -64,33 +70,54 @@ class CrosswalkDetectionApp(App):
         Releases source of frames.
     """
 
-
     def build(self):
         """Runs when app starts.
         
         Get source of frmaes from config.ini file.
         Starts video capturing and show kivy Image component with KivyCV class.
         """
-        config = configparser.ConfigParser()
-        config.read('config.ini')
+        self.config = configparser.ConfigParser()
+        self.config.read('config.ini')
 
-        print(config['input']['src'])
-        if config['input']['src'] == 'camera':
-            input = 0
+        print(self.config['input']['src'])
+        if self.config['input']['src'] == 'phone_camera':
+            # only for tests with ip cam
+            self.input = "http://192.168.140.254:8080/video"
+        elif self.config['input']['src'] == 'camera':
+            self.input = 0
         else:
-            input = config['input']['src']
+            self.input = self.config['input']['src']
 
         try:
-            self.capture = cv2.VideoCapture(input)
-            my_camera = KivyCV(capture=self.capture, fps=60)
-            return my_camera
+            self.capture = cv2.VideoCapture(self.input)
+            self.my_camera = KivyCV(capture=self.capture, fps=60)
+            layout = FloatLayout()
+            button = Button(text="Camera / video input", 
+                    size_hint=(1,0.12), 
+                    pos_hint={'center_x': .5}, 
+                    background_normal = 'assets/normal.png',
+                    background_down = 'assets/down.png',
+                    border = (30, 30, 30, 30),)
+            button.bind(on_press=self.on_input_change)
+
+            layout.add_widget(self.my_camera)
+            layout.add_widget(button)
+            return layout
 
         except Exception:
             print("Check if correct input in config.ini")
 
+    def on_input_change(self, _):
+        if self.input == 0:
+            self.input = self.config['input']['src']
+        else:
+            self.input = 0
+        self.my_camera.capture.release()
+        self.my_camera.capture = cv2.VideoCapture(self.input)
+
+
     def on_stop(self):
         self.capture.release()
 
-
 if __name__ == '__main__':
-    CrosswalkDetectionApp().run()
+   CrosswalkDetectionApp().run()
