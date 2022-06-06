@@ -11,6 +11,8 @@ from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.camera import Camera
 from kivy.lang import Builder
+from kivy.core.audio import SoundLoader
+
 
 # from android.permissions import request_permissions, Permission
  
@@ -31,6 +33,9 @@ class KivyCV(Image):
 
     def __init__(self, capture, fps, **kwargs):
         Image.__init__(self, **kwargs)
+        self.sound = SoundLoader.load('/assets/mario.wav')
+        self.sound.play()
+
         self.capture = capture
         # set interval to read frames
         Clock.schedule_interval(self.update, 1.0 / fps)
@@ -45,8 +50,13 @@ class KivyCV(Image):
         ret, frame = self.capture.read()
         if ret:
             # use Detector class to detect object on frame
-            frame = Detector.detect_crosswalk_only_center(frame)
+            frame, found = Detector.detect_crosswalk_as_one(frame)
             if frame is not None:
+                if found:
+                    self.sound.play()
+                else:
+                    self.sound.stop()
+
                 # create texture from np.array
                 buf = cv2.flip(frame, 0).tostring()
                 image_texture = Texture.create(

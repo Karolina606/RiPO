@@ -6,3 +6,10 @@ camera_ex.py
 brudnopis.py
 *.mp4
 *.pdf
+example.py
+retrain.py
+label_image.py
+tf_files
+tf_files1
+images
+my_log_dir
