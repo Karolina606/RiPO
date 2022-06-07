@@ -37,7 +37,7 @@ class KivyCV(Image):
 
         self.capture = capture
         # set interval to read frames
-        Clock.schedule_interval(self.update, 1.0 / fps)
+        Clock.schedule_interval(self.update, 0.01 / fps)
 
 
     def update(self, dt):

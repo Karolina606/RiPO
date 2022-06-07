@@ -158,8 +158,8 @@ class Detector:
         copy_img = cv2.resize(copy_img,(1600,800))
 
 
-        min_area = 800
-        max_area = 1500
+        min_area = 1000
+        max_area = 2000
         min_x = int(0.1 * copy_img.shape[1])
         max_x = int(0.9 * copy_img.shape[1])
         min_y = int(0.25 * copy_img.shape[0])
@@ -178,15 +178,15 @@ class Detector:
             if area > min_area and area < max_area:
                 x,y,w,h = cv2.boundingRect(i)
                 if x > min_x and x + w < max_x and y > min_y and y + h < max_y:
-                    w += int(0.3 * w)
-                    h += int(0.3 * h) 
+                    w += int(0.15 * w)
+                    h += int(0.15 * h) 
                     # cv2.drawContours(img, i, -1, (0, 255, 0), thickness=2)
 
                     points = np.array([[x, y], [x+w, y], [x+w, y+h], [x, y+h]])
                     cv2.drawContours(copy_img, [points], -1, (255, 255, 255), thickness=20)
                     cv2.fillPoly(copy_img, [points], color=(255, 255, 255))
 
-
+        found = False
         # Once again
         imgGray = cv2.cvtColor(copy_img,cv2.COLOR_BGR2GRAY)
         imgBlur = cv2.GaussianBlur(imgGray,(5,5),0)
@@ -201,13 +201,12 @@ class Detector:
         min_area = 15000
         max_area = 90000
 
-        found = False
         for i in cnt:
             area = cv2.contourArea(i)
             if area > min_area and area < max_area:
                 x,y,w,h = cv2.boundingRect(i)
                 if x > min_x and x + w < max_x and y > min_y and y + h < max_y:
-                    if w > 2.4 * h:
+                    if w > 2.1 * h:
                         cv2.drawContours(img, i, -1, (0, 0, 255), thickness=2)
                         found = True
         # draw area of interest
