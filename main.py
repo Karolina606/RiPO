@@ -33,8 +33,7 @@ class KivyCV(Image):
 
     def __init__(self, capture, fps, **kwargs):
         Image.__init__(self, **kwargs)
-        self.sound = SoundLoader.load('/assets/mario.wav')
-        self.sound.play()
+        self.sound = SoundLoader.load("assets/mario.wav")
 
         self.capture = capture
         # set interval to read frames
