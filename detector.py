@@ -172,10 +172,13 @@ class Detector:
 
         contouts,hie = cv2.findContours(imgDia,cv2.RETR_TREE,cv2.CHAIN_APPROX_NONE)
         cnt = contouts
+        img = cv2.resize(img,(1600,800))
 
         for i in cnt:
             area = cv2.contourArea(i)
-            if area > min_area and area < max_area:
+            peri = cv2.arcLength(i, True)
+            approx = cv2.approxPolyDP(i, 0.05 * peri, True)
+            if area > min_area and area < max_area and len(approx) == 4:
                 x,y,w,h = cv2.boundingRect(i)
                 if x > min_x and x + w < max_x and y > min_y and y + h < max_y:
                     w += int(0.15 * w)
@@ -185,6 +188,10 @@ class Detector:
                     points = np.array([[x, y], [x+w, y], [x+w, y+h], [x, y+h]])
                     cv2.drawContours(copy_img, [points], -1, (255, 255, 255), thickness=20)
                     cv2.fillPoly(copy_img, [points], color=(255, 255, 255))
+
+                    cv2.drawContours(img, i, -1, (255, 0, 255), thickness=2)
+                   
+                    cv2.putText(img, str(len(approx)), (x, y), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 255), 2)
 
         found = False
         # Once again
@@ -197,7 +204,7 @@ class Detector:
         contouts,hie = cv2.findContours(imgDia,cv2.RETR_TREE,cv2.CHAIN_APPROX_NONE)
         cnt = contouts
 
-        img = cv2.resize(img,(1600,800))
+        # img = cv2.resize(img,(1600,800))
         min_area = 15000
         max_area = 90000
 
